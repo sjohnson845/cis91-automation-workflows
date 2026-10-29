@@ -62,7 +62,8 @@
             {
               "key": "rating",
               "cssSelector": "p.star-rating",
-              "returnValue": "attribute"
+              "returnValue": "attribute",
+              "attribute": "class"
             }
           ]
         },
@@ -178,7 +179,7 @@
           "cachedResultUrl": "/projects/Vw9RAiESboKBaUYt/datatables/CH0DL3GFZoaCYpSW"
         },
         "columns": {
-          "mappingMode": "defineBelow",
+          "mappingMode": "autoMapInputData",
           "value": {
             "in_stock": false
           },
@@ -243,8 +244,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        1344,
-        -112
+        1376,
+        64
       ],
       "id": "ed31b46b-e296-46cb-a732-43c190e67d82",
       "name": "Save Books"
@@ -450,6 +451,11 @@
             "node": "Summary Statistics",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Save Books",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -469,11 +475,6 @@
       "main": [
         [
           {
-            "node": "Save Books",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "Save Summary",
             "type": "main",
             "index": 0
@@ -491,6 +492,11 @@
           }
         ]
       ]
+    },
+    "Save Summary": {
+      "main": [
+        []
+      ]
     }
   },
   "active": false,
@@ -498,7 +504,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "344f5d1d-065d-4ee9-befb-76340fa66a09",
+  "versionId": "e5ebb899-2ce8-404e-89f6-c153b7522101",
   "meta": {
     "instanceId": "74ee99bc740c6dac711ced63f616b978808d56ad1bdf9d964ab20472df081c38"
   },
