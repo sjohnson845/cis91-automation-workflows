@@ -1,0 +1,751 @@
+{
+  "name": "Sentiment Analysis Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-v4.1-flash-1017",
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        176
+      ],
+      "id": "e8f5ce63-dcc8-4b76-ba89-34355ceda722",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "hYEZWPbHVPeNQb9h",
+          "name": "SJ OpenRouter"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"sentiment\": \"positive\",\n  \"confidence\": 0.95,\n  \"key_emotion\": \"joy\",\n  \"summary\": \"one-sentence summary of the review\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        176
+      ],
+      "id": "98c044e8-3d58-4f62-bc40-d891f38c58cf",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -32
+      ],
+      "id": "064f60f4-ff84-4bc2-b472-87060fc41be4",
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nreturn [\n  {\n    json: {\n      review_id: 'R001',\n      product: 'Wireless Earbuds Pro',\n      reviewer: 'Alice M.',\n      review_text: 'Absolutely love these earbuds! Sound quality is incredible and the battery lasts all day. Best purchase I made this year.',\n      date: '2026-03-01'\n    }\n  },\n  {\n    json: {\n      review_id: 'R002',\n      product: 'Wireless Earbuds Pro',\n      reviewer: 'Bob T.',\n      review_text: 'Terrible quality. The left earbud stopped working after two days. Customer service was unhelpful and rude. Want my money back.',\n      date: '2026-03-03'\n    }\n  },\n  {\n    json: {\n      review_id: 'R003',\n      product: 'Phone Case Ultra',\n      reviewer: 'Carol S.',\n      review_text: 'It is a phone case. It fits my phone and seems to protect it fine. Nothing special but nothing wrong with it either.',\n      date: '2026-03-05'\n    }\n  },\n  {\n    json: {\n      review_id: 'R004',\n      product: 'Laptop Stand Deluxe',\n      reviewer: 'David K.',\n      review_text: 'The stand wobbles slightly but overall improves my desk setup. Wish it was more adjustable. Decent for the price.',\n      date: '2026-03-07'\n    }\n  },\n  {\n    json: {\n      review_id: 'R005',\n      product: 'Laptop Stand Deluxe',\n      reviewer: 'Eve R.',\n      review_text: 'This completely transformed my workspace! Ergonomic, sturdy, and looks great. My neck pain is gone. Five stars easily!',\n      date: '2026-03-09'\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        -32
+      ],
+      "id": "60d0443d-0c9b-4a90-9a32-6acc49f2fe6f",
+      "name": "Test Reviews"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the sentiment of this product review.\n\nProduct: {{ $json.product }}\nReview: {{ $json.review_text }}\n\nClassify the sentiment as positive, negative, or neutral.\nProvide a confidence score between 0 and 1.\nIdentify the key emotion.\nWrite a one-sentence summary.",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -96,
+        -32
+      ],
+      "id": "d7cd0b37-f5c2-4992-9ef8-d00d924d6b8b",
+      "name": "Analyze Sentiment"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "\n// The Structured Output Parser puts the parsed object in $json.output\nconst aiResult = $json.output;\n\n// The original review this AI result came from\nconst review = $('Test Reviews').item.json;\n\nreturn {\n  json: {\n    review_id: review.review_id,\n    product: review.product,\n    reviewer: review.reviewer,\n    review_text: review.review_text,\n    date: review.date,\n    sentiment: aiResult.sentiment,\n    confidence: aiResult.confidence,\n    key_emotion: aiResult.key_emotion,\n    ai_summary: aiResult.summary\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        192,
+        -32
+      ],
+      "id": "0bd4f544-4c32-406a-b980-0f05aa94d9f2",
+      "name": "Combine Results"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.sentiment }}",
+                    "rightValue": "positive",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "6fd907cd-0bc9-4f0c-aaa9-2d78c5075bf3"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Positive"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "e63ece57-f0b5-4eac-ad59-2b0d3b0955a9",
+                    "leftValue": "={{ $json.sentiment }}",
+                    "rightValue": "negative",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Negative"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.5,
+      "position": [
+        368,
+        -48
+      ],
+      "id": "cbacd7b8-4807-4063-a6b2-2567d97e1dd2",
+      "name": "Route by Sentiment"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "639cfe90-0e76-44f1-b694-12e99ab8b30d",
+              "name": "action",
+              "value": "Feature in testimonials",
+              "type": "string"
+            },
+            {
+              "id": "ca75da23-946b-431a-a62b-5ff682bfb139",
+              "name": "priority",
+              "value": "low",
+              "type": "string"
+            },
+            {
+              "id": "03519ab1-7b18-4dbb-86a9-c2c3c4038974",
+              "name": "follow_up",
+              "value": "Send thank-you coupon",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        576,
+        -192
+      ],
+      "id": "14b8d694-63b2-485b-b383-7df472e534e1",
+      "name": "Positive Action"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0dcf5b0c-607a-4946-b443-72707bc40f51",
+              "name": "action",
+              "value": "Escalate to customer success",
+              "type": "string"
+            },
+            {
+              "id": "d9be77aa-0763-4ea8-8021-5ee1ffd38116",
+              "name": "priority",
+              "value": "high",
+              "type": "string"
+            },
+            {
+              "id": "fe7e0aaf-5a20-40e3-97e9-bb00e32e4e77",
+              "name": "follow_up",
+              "value": "Reach out within 24 hours",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        576,
+        -32
+      ],
+      "id": "7884adf3-c733-49d8-8c30-3c5a1a4bae99",
+      "name": "Negative Action"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aa6a717b-eba3-41db-b27e-ce51ca3da4fe",
+              "name": "action",
+              "value": "Add to product feedback log",
+              "type": "string"
+            },
+            {
+              "id": "ce5e4d6a-9539-4806-955e-fdcb516cfa94",
+              "name": "priority",
+              "value": "medium",
+              "type": "string"
+            },
+            {
+              "id": "861de4e8-ed7e-419a-9d86-78fc9b4717dc",
+              "name": "follow_up",
+              "value": "Include in weekly product review",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        576,
+        160
+      ],
+      "id": "580a1e65-343d-48c9-abee-8fe7b97bdf3e",
+      "name": "Neutral Action"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        832,
+        -48
+      ],
+      "id": "ef706a41-26ed-4c81-b35c-00a673c6e3ab",
+      "name": "Combine All"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst items = $input.all();\nconst total = items.length;\nconst positive = items.filter(i => i.json.sentiment === 'positive').length;\nconst negative = items.filter(i => i.json.sentiment === 'negative').length;\nconst neutral = total - positive - negative;\nconst avgConfidence = items.reduce((sum, i) => sum + (i.json.confidence || 0), 0) / total;\nconst escalations = items.filter(i => i.json.priority === 'high').length;\n\nreturn [{\n  json: {\n    report_title: 'Sentiment Analysis Dashboard',\n    generated_at: new Date().toISOString(),\n    total_reviews: total,\n    positive_count: positive,\n    positive_pct: Math.round((positive / total) * 100) + '%',\n    negative_count: negative,\n    negative_pct: Math.round((negative / total) * 100) + '%',\n    neutral_count: neutral,\n    neutral_pct: Math.round((neutral / total) * 100) + '%',\n    average_confidence: Math.round(avgConfidence * 100) / 100,\n    escalations_needed: escalations\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        -112
+      ],
+      "id": "fe4eaf5d-670b-4b6e-8bba-156a92319118",
+      "name": "Generate Dashboard"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "vkoxwk8jqcTHGMOE",
+          "mode": "list",
+          "cachedResultName": "SJ Reviews",
+          "cachedResultUrl": "/projects/Vw9RAiESboKBaUYt/datatables/vkoxwk8jqcTHGMOE"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "review_id",
+              "displayName": "review_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "product",
+              "displayName": "product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reviewer",
+              "displayName": "reviewer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "review_text",
+              "displayName": "review_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "confidence",
+              "displayName": "confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "key_emotion",
+              "displayName": "key_emotion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ai_summary",
+              "displayName": "ai_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "action",
+              "displayName": "action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "priority",
+              "displayName": "priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "follow_up",
+              "displayName": "follow_up",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1008,
+        64
+      ],
+      "id": "0e1f6a07-1d1c-466e-96f0-e9e46785c401",
+      "name": "Log Reviews"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "g90zKAYNTku0FQas",
+          "mode": "list",
+          "cachedResultName": "SJ Sentiment Dashboard",
+          "cachedResultUrl": "/projects/Vw9RAiESboKBaUYt/datatables/g90zKAYNTku0FQas"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "report_title",
+              "displayName": "report_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "generated_at",
+              "displayName": "generated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "total_reviews",
+              "displayName": "total_reviews",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "positive_count",
+              "displayName": "positive_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "positive_pct",
+              "displayName": "positive_pct",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "negative_count",
+              "displayName": "negative_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "negative_pct",
+              "displayName": "negative_pct",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "neutral_count",
+              "displayName": "neutral_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "neutral_pct",
+              "displayName": "neutral_pct",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "average_confidence",
+              "displayName": "average_confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "escalations_needed",
+              "displayName": "escalations_needed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1184,
+        -112
+      ],
+      "id": "97d299e8-6296-4ab1-b36c-f955acea79c6",
+      "name": "Log Dashboard"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analyze Sentiment",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Analyze Sentiment",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Test Reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Reviews": {
+      "main": [
+        [
+          {
+            "node": "Analyze Sentiment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Sentiment": {
+      "main": [
+        [
+          {
+            "node": "Combine Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Results": {
+      "main": [
+        [
+          {
+            "node": "Route by Sentiment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Sentiment": {
+      "main": [
+        [
+          {
+            "node": "Positive Action",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Negative Action",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Neutral Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Neutral Action": {
+      "main": [
+        [
+          {
+            "node": "Combine All",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Positive Action": {
+      "main": [
+        [
+          {
+            "node": "Combine All",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Negative Action": {
+      "main": [
+        [
+          {
+            "node": "Combine All",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Combine All": {
+      "main": [
+        [
+          {
+            "node": "Generate Dashboard",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Dashboard": {
+      "main": [
+        [
+          {
+            "node": "Log Dashboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e6c92f4f-34d3-43de-8d4f-5250386b00ab",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "74ee99bc740c6dac711ced63f616b978808d56ad1bdf9d964ab20472df081c38"
+  },
+  "nodeGroups": [],
+  "id": "IDjYQk7QvNSywvoi",
+  "tags": []
+}
