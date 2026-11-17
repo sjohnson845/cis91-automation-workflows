@@ -1,0 +1,417 @@
+{
+  "name": "CSC Blueprint AI Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {
+          "allowedOrigins": "https://www.resultsmatter.life"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -576,
+        -32
+      ],
+      "id": "16bcf630-4e79-4a6a-86e1-a029154401b8",
+      "name": "Receive Question | Chat Trigger",
+      "webhookId": "c512d334-c8db-4c5c-a38a-61c7608d16cb"
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are the message classifier for the CSC Blueprint AI Assistant.  Your job is to classify incoming questions about the Catholic Schools Collaborative (CSC) Blueprint.  Choose exactly ONE category from this list:  CSC History and Mission SIMPLE and Four Pillars Instruction and Technology Implementation and School Readiness Evidence and Outcomes Leadership and Sustainability Beyond CSC Practical Tools Other  Use \"Other\" when the question is unrelated to CSC or cannot be classified into the listed topics.  Return three fields:  category: The exact category name from the list. confidence: A number between 0 and 1 indicating confidence in the classification. reasoning: One brief sentence explaining why the category was selected.  Classify the question only. Do not answer it.  Return valid JSON without Markdown formatting or code fences."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -352,
+        -32
+      ],
+      "id": "91a1ff77-1517-49d0-8df7-d757ddda1a42",
+      "name": "Classify Question | LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-v4.1-flash-1017",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        208
+      ],
+      "id": "14394b84-0450-4c69-9af2-4c42d8ac3854",
+      "name": "Classification AI | OpenRouter",
+      "credentials": {
+        "openRouterApi": {
+          "id": "hYEZWPbHVPeNQb9h",
+          "name": "SJ OpenRouter"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"category\": \"Evidence and Outcomes\",\n  \"confidence\": 0.95,\n  \"reasoning\": \"The question concerns CSC's documented educational impact.\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -208,
+        208
+      ],
+      "id": "d6cb4f66-b6fe-4eee-bbb4-ef9c5cb5c94a",
+      "name": "Format Category | Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Receive Question | Chat Trigger').first().json.chatInput }}",
+        "options": {
+          "systemMessage": "You are the CSC Blueprint AI Assistant for Results Matter (resultsmatter.life).\n\nYour purpose is to answer questions about the Catholic Schools Collaborative (CSC), its educational model, implementation, outcomes, and lessons learned.\n\nKNOWLEDGE BASE\nYou have access to a Data Table tool containing 50 knowledge entries derived from the published CSC 2026 Blueprint: An Integrated, Data-Driven Whole Child Model by Design.\n\nFor every visitor question:\n1. Use the CSC_Blueprint_KB Data Table tool to retrieve the knowledge entries.\n2. Identify the entries most relevant to the visitor's question, considering questions, answers, categories, and keywords.\n3. Base your answer on the relevant entries, not on general knowledge.\n4. Include relevant Blueprint page references when available.\n5. If multiple entries are relevant, synthesize their information into one coherent answer.\n6. If the knowledge base does not establish the answer, say so clearly. Do not invent facts.\n\nRESPONSE STYLE\n- Be professional, welcoming, and clear.\n- Answer the visitor's specific question directly.\n- Use concise paragraphs and explain educational terminology when useful.\n- Provide numerical results accurately, including measurement context.\n- Suggest consulting the Blueprint when more detail is needed.\n\nEVIDENCE AND LIMITATIONS\n- Distinguish documented results from interpretations and recommendations.\n- Do not claim that CSC caused an outcome unless the Blueprint establishes causation.\n- Do not assume that results from CSC schools will automatically generalize to other schools.\n- Do not invent citations, statistics, dates, or program details.\n\nCONVERSATION\nUse the available chat memory to understand follow-up questions. Always consult the knowledge base for factual CSC information, even when the question refers to an earlier response.\n\nIf a question is unrelated to CSC, politely explain that this assistant specializes in the CSC Blueprint.\n\nYour goal is to help visitors understand the CSC Blueprint accurately and explore its findings and practical applications.\n\nAnswer every question patiently and professionally, even when the visitor has asked the same question before. Never criticize the visitor, count repeated questions, suggest refreshing the page because of repetition, or express frustration. Treat each question as a genuine request for information.\n\nRESPONSE FORMATTING AND CONVERSATION\nWrite responses in clear, readable paragraphs using actual line breaks. Never output the literal characters backslash-n (\\n) or backslash-t (\\t). Use numbered lists when appropriate and avoid unnecessary formatting symbols.\n\nAnswer repeated questions patiently and professionally. Never mention how many times a visitor has asked a question, express frustration, or suggest that the visitor is wasting time. Treat every question as a genuine request for information.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        64,
+        -32
+      ],
+      "id": "9cef12bb-9ef7-4be1-aae2-909de9f0f757",
+      "name": "Generate Answer | AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-v4.1-flash-1017",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        0,
+        192
+      ],
+      "id": "e4946d86-1d6b-4940-8679-0b399fc01c62",
+      "name": "Answer AI | OpenRouter",
+      "credentials": {
+        "openRouterApi": {
+          "id": "hYEZWPbHVPeNQb9h",
+          "name": "SJ OpenRouter"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        160,
+        192
+      ],
+      "id": "cc5e12b6-45a5-4cee-ba66-26df99af5d62",
+      "name": "Remember Conversation | Memory"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Retrieve the 50 entries in the CSC Blueprint knowledge base. Each entry contains a question, answer, category, keywords, source summary, and Blueprint page reference. Use this tool whenever a visitor asks about the Catholic Schools Collaborative. Identify the entries relevant to the question and base your response on their contents. Do not invent information that is not supported by the retrieved entries.Get row(s) in Data table",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "IibYkXGjTPWXQTCi",
+          "mode": "list",
+          "cachedResultName": "CSC_Blueprint_KB",
+          "cachedResultUrl": "/projects/Vw9RAiESboKBaUYt/datatables/IibYkXGjTPWXQTCi"
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        192
+      ],
+      "id": "aa00046a-8f75-49e9-86c7-c92d371ee2d0",
+      "name": "Look Up Knowledge | Data Table"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "mHIHaZDKT8kGJYvh",
+          "mode": "list",
+          "cachedResultName": "CSC_Interaction_Log",
+          "cachedResultUrl": "/projects/Vw9RAiESboKBaUYt/datatables/mHIHaZDKT8kGJYvh"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $('Receive Question | Chat Trigger').first().json.sessionId }}",
+            "timestamp": "={{ $now.toISO() }}",
+            "original_message": "={{ $('Receive Question | Chat Trigger').first().json.chatInput }}",
+            "category": "={{ $('Classify Question | LLM Chain').first().json.output.category }}",
+            "confidence": "={{ $('Classify Question | LLM Chain').first().json.output.confidence }}",
+            "reasoning": "={{ $('Classify Question | LLM Chain').first().json.output.reasoning }}",
+            "matched_kb_entries": "={{ 'KB retrieval completed; individual matches not yet captured' }}",
+            "ai_response": "={{ $('Generate Answer | AI Agent').first().json.output }}",
+            "delivery_status": "={{ 'Generated - delivery not yet verified' }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "original_message",
+              "displayName": "original_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "confidence",
+              "displayName": "confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reasoning",
+              "displayName": "reasoning",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "matched_kb_entries",
+              "displayName": "matched_kb_entries",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ai_response",
+              "displayName": "ai_response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "delivery_status",
+              "displayName": "delivery_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        -32
+      ],
+      "id": "345250b0-c34d-430d-91ff-0b3edea85fac",
+      "name": "Log Interaction | Data Table"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7fc5cfc3-f16e-47c0-90bb-3b5d82f91a14",
+              "name": "output",
+              "value": "={{ $('Generate Answer | AI Agent').first().json.output.replace(/(?:\\\\n|\\n)+/g, '\\n').replace(/\\\\t/g, ' ').trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        688,
+        -32
+      ],
+      "id": "d0a953e1-6bc9-419a-bca7-774d0aa8c34b",
+      "name": "Prepare Response | Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receive Question | Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "Classify Question | LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Question | LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Generate Answer | AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classification AI | OpenRouter": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Classify Question | LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Category | Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Classify Question | LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Answer | AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Log Interaction | Data Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer AI | OpenRouter": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Answer | AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remember Conversation | Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Generate Answer | AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Look Up Knowledge | Data Table": {
+      "ai_tool": [
+        [
+          {
+            "node": "Generate Answer | AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Interaction | Data Table": {
+      "main": [
+        [
+          {
+            "node": "Prepare Response | Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "fe0997c9-0991-453c-9034-49d3b06a4af7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "74ee99bc740c6dac711ced63f616b978808d56ad1bdf9d964ab20472df081c38"
+  },
+  "nodeGroups": [],
+  "id": "sQYYe39FUfQhnKeU",
+  "tags": []
+}
