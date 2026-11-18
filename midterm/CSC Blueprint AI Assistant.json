@@ -34,7 +34,7 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        -352,
+        -128,
         -32
       ],
       "id": "91a1ff77-1517-49d0-8df7-d757ddda1a42",
@@ -48,7 +48,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -352,
+        -128,
         208
       ],
       "id": "14394b84-0450-4c69-9af2-4c42d8ac3854",
@@ -67,7 +67,7 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -208,
+        16,
         208
       ],
       "id": "d6cb4f66-b6fe-4eee-bbb4-ef9c5cb5c94a",
@@ -78,17 +78,20 @@
         "promptType": "define",
         "text": "={{ $('Receive Question | Chat Trigger').first().json.chatInput }}",
         "options": {
-          "systemMessage": "You are the CSC Blueprint AI Assistant for Results Matter (resultsmatter.life).\n\nYour purpose is to answer questions about the Catholic Schools Collaborative (CSC), its educational model, implementation, outcomes, and lessons learned.\n\nKNOWLEDGE BASE\nYou have access to a Data Table tool containing 50 knowledge entries derived from the published CSC 2026 Blueprint: An Integrated, Data-Driven Whole Child Model by Design.\n\nFor every visitor question:\n1. Use the CSC_Blueprint_KB Data Table tool to retrieve the knowledge entries.\n2. Identify the entries most relevant to the visitor's question, considering questions, answers, categories, and keywords.\n3. Base your answer on the relevant entries, not on general knowledge.\n4. Include relevant Blueprint page references when available.\n5. If multiple entries are relevant, synthesize their information into one coherent answer.\n6. If the knowledge base does not establish the answer, say so clearly. Do not invent facts.\n\nRESPONSE STYLE\n- Be professional, welcoming, and clear.\n- Answer the visitor's specific question directly.\n- Use concise paragraphs and explain educational terminology when useful.\n- Provide numerical results accurately, including measurement context.\n- Suggest consulting the Blueprint when more detail is needed.\n\nEVIDENCE AND LIMITATIONS\n- Distinguish documented results from interpretations and recommendations.\n- Do not claim that CSC caused an outcome unless the Blueprint establishes causation.\n- Do not assume that results from CSC schools will automatically generalize to other schools.\n- Do not invent citations, statistics, dates, or program details.\n\nCONVERSATION\nUse the available chat memory to understand follow-up questions. Always consult the knowledge base for factual CSC information, even when the question refers to an earlier response.\n\nIf a question is unrelated to CSC, politely explain that this assistant specializes in the CSC Blueprint.\n\nYour goal is to help visitors understand the CSC Blueprint accurately and explore its findings and practical applications.\n\nAnswer every question patiently and professionally, even when the visitor has asked the same question before. Never criticize the visitor, count repeated questions, suggest refreshing the page because of repetition, or express frustration. Treat each question as a genuine request for information.\n\nRESPONSE FORMATTING AND CONVERSATION\nWrite responses in clear, readable paragraphs using actual line breaks. Never output the literal characters backslash-n (\\n) or backslash-t (\\t). Use numbered lists when appropriate and avoid unnecessary formatting symbols.\n\nAnswer repeated questions patiently and professionally. Never mention how many times a visitor has asked a question, express frustration, or suggest that the visitor is wasting time. Treat every question as a genuine request for information.\n\n"
+          "systemMessage": "You are the CSC Blueprint AI Assistant for Results Matter (resultsmatter.life).\n\nYour purpose is to answer questions about the Catholic Schools Collaborative (CSC), its educational model, implementation, outcomes, and lessons learned.\n\nKNOWLEDGE BASE\nYou have access to a Data Table tool containing 50 knowledge entries derived from the published CSC 2026 Blueprint: An Integrated, Data-Driven Whole Child Model by Design.\n\nFor every visitor question:\n1. Use the CSC_Blueprint_KB Data Table tool to retrieve the knowledge entries.\n2. Identify the entries most relevant to the visitor's question, considering questions, answers, categories, and keywords.\n3. Base your answer on the relevant entries, not on general knowledge.\n4. Include relevant Blueprint page references when available.\n5. If multiple entries are relevant, synthesize their information into one coherent answer.\n6. If the knowledge base does not establish the answer, say so clearly. Do not invent facts.\n\nRESPONSE STYLE\n- Be professional, welcoming, and clear.\n- Answer the visitor's specific question directly.\n- Use concise paragraphs and explain educational terminology when useful.\n- Provide numerical results accurately, including measurement context.\n- Suggest consulting the Blueprint when more detail is needed.\n\nEVIDENCE AND LIMITATIONS\n- Distinguish documented results from interpretations and recommendations.\n- Do not claim that CSC caused an outcome unless the Blueprint establishes causation.\n- Do not assume that results from CSC schools will automatically generalize to other schools.\n- Do not invent citations, statistics, dates, or program details.\n\nCONVERSATION\nUse the available chat memory to understand follow-up questions. Always consult the knowledge base for factual CSC information, even when the question refers to an earlier response.\n\nIf a question is unrelated to CSC, politely explain that this assistant specializes in the CSC Blueprint.\n\nYour goal is to help visitors understand the CSC Blueprint accurately and explore its findings and practical applications.\n\nAnswer every question patiently and professionally, even when the visitor has asked the same question before. Never criticize the visitor, count repeated questions, suggest refreshing the page because of repetition, or express frustration. Treat each question as a genuine request for information.\n\nRESPONSE FORMATTING AND CONVERSATION\nWrite responses in clear, readable paragraphs using actual line breaks. Never output the literal characters backslash-n (\\n) or backslash-t (\\t). Use numbered lists when appropriate and avoid unnecessary formatting symbols.\n\nAnswer repeated questions patiently and professionally. Never mention how many times a visitor has asked a question, express frustration, or suggest that the visitor is wasting time. Treat every question as a genuine request for information.\n\n",
+          "returnIntermediateSteps": true
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        64,
+        288,
         -32
       ],
       "id": "9cef12bb-9ef7-4be1-aae2-909de9f0f757",
-      "name": "Generate Answer | AI Agent"
+      "name": "Generate Answer | AI Agent",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -98,8 +101,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        0,
-        192
+        240,
+        208
       ],
       "id": "e4946d86-1d6b-4940-8679-0b399fc01c62",
       "name": "Answer AI | OpenRouter",
@@ -117,8 +120,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.4,
       "position": [
-        160,
-        192
+        368,
+        208
       ],
       "id": "cc5e12b6-45a5-4cee-ba66-26df99af5d62",
       "name": "Remember Conversation | Memory"
@@ -140,8 +143,8 @@
       "type": "n8n-nodes-base.dataTableTool",
       "typeVersion": 1.1,
       "position": [
-        320,
-        192
+        496,
+        208
       ],
       "id": "aa00046a-8f75-49e9-86c7-c92d371ee2d0",
       "name": "Look Up Knowledge | Data Table"
@@ -164,9 +167,9 @@
             "category": "={{ $('Classify Question | LLM Chain').first().json.output.category }}",
             "confidence": "={{ $('Classify Question | LLM Chain').first().json.output.confidence }}",
             "reasoning": "={{ $('Classify Question | LLM Chain').first().json.output.reasoning }}",
-            "matched_kb_entries": "={{ 'KB retrieval completed; individual matches not yet captured' }}",
+            "matched_kb_entries": "={{ JSON.stringify($('Generate Answer | AI Agent').first().json.intermediateSteps.map(step => ({tool: step.action.tool, records: JSON.parse(step.observation).map(row => row.kb_id)}))) }}",
             "ai_response": "={{ $('Generate Answer | AI Agent').first().json.output }}",
-            "delivery_status": "={{ 'Generated - delivery not yet verified' }}"
+            "delivery_status": "={{ $('Prepare Response | Edit Fields').first().json.output ? 'Response prepared successfully; browser delivery not verified' : 'Response preparation failed' }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -269,8 +272,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        448,
-        -32
+        1136,
+        -48
       ],
       "id": "345250b0-c34d-430d-91ff-0b3edea85fac",
       "name": "Log Interaction | Data Table"
@@ -282,7 +285,7 @@
             {
               "id": "7fc5cfc3-f16e-47c0-90bb-3b5d82f91a14",
               "name": "output",
-              "value": "={{ $('Generate Answer | AI Agent').first().json.output.replace(/(?:\\\\n|\\n)+/g, '\\n').replace(/\\\\t/g, ' ').trim() }}",
+              "value": "={{ String($json.output ?? \"I'm sorry, but the CSC Blueprint Assistant couldn't complete your request. Please try again.\").replace(/(?:\\\\n|\\n)+/g, '\\n').replace(/\\\\t/g, ' ').trim() }}",
               "type": "string"
             }
           ]
@@ -292,11 +295,199 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        688,
-        -32
+        880,
+        -48
       ],
       "id": "d0a953e1-6bc9-419a-bca7-774d0aa8c34b",
       "name": "Prepare Response | Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "70f08c85-0eca-4aff-b2de-589ec38ecf0d",
+              "name": "=sender",
+              "value": "={{ $json.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "d8381ec5-e8be-4b3f-8b0c-5fc8278caea0",
+              "name": "=message",
+              "value": "={{ $json.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "f7d78da8-4735-48ee-9dae-83b99a2ee615",
+              "name": "=subject",
+              "value": "={{ $json.chatInput.split(/[?.!\\n]/)[0].trim().slice(0, 120) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -352,
+        -32
+      ],
+      "id": "7832311e-3add-4801-8d75-fd330fdf0b6d",
+      "name": "Prepare Intake | Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f959b43a-5d73-4f7c-9e9c-030aa7350a48",
+              "name": "output",
+              "value": "I'm sorry, but the CSC Blueprint Assistant couldn't complete your request right now. Please try again in a moment.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        880,
+        192
+      ],
+      "id": "4f4d43a0-737d-48c8-9b2c-95b1a69d6be5",
+      "name": "Prepare Error Response | Edit Fields"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "mHIHaZDKT8kGJYvh",
+          "mode": "list",
+          "cachedResultName": "CSC_Interaction_Log",
+          "cachedResultUrl": "/projects/Vw9RAiESboKBaUYt/datatables/mHIHaZDKT8kGJYvh"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $('Receive Question | Chat Trigger').first().json.sessionId }}",
+            "timestamp": "={{ $now.toISO() }}",
+            "original_message": "={{ $('Receive Question | Chat Trigger').first().json.chatInput }}",
+            "category": "={{ $('Classify Question | LLM Chain').first().json.output.category }}",
+            "confidence": "={{ $('Classify Question | LLM Chain').first().json.output.confidence }}",
+            "reasoning": "={{ $('Classify Question | LLM Chain').first().json.output.reasoning }}",
+            "matched_kb_entries": "Not available - AI Agent failed before completing response",
+            "ai_response": "I'm sorry, but the CSC Blueprint Assistant couldn't complete your request. Please try again in a moment.",
+            "delivery_status": "AI Agent error - fallback response prepared; delivery not verified"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "original_message",
+              "displayName": "original_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "confidence",
+              "displayName": "confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reasoning",
+              "displayName": "reasoning",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "matched_kb_entries",
+              "displayName": "matched_kb_entries",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ai_response",
+              "displayName": "ai_response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "delivery_status",
+              "displayName": "delivery_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1136,
+        192
+      ],
+      "id": "43fd8eea-9f7d-41ae-8dad-67bf7dfed1e4",
+      "name": "Log Error | Data Table"
     }
   ],
   "pinData": {},
@@ -305,7 +496,7 @@
       "main": [
         [
           {
-            "node": "Classify Question | LLM Chain",
+            "node": "Prepare Intake | Edit Fields",
             "type": "main",
             "index": 0
           }
@@ -349,7 +540,14 @@
       "main": [
         [
           {
-            "node": "Log Interaction | Data Table",
+            "node": "Prepare Response | Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Error Response | Edit Fields",
             "type": "main",
             "index": 0
           }
@@ -391,9 +589,41 @@
     },
     "Log Interaction | Data Table": {
       "main": [
+        []
+      ]
+    },
+    "Prepare Intake | Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Classify Question | LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Response | Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Log Interaction | Data Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Error Response | Edit Fields": {
+      "main": [
         [
           {
             "node": "Prepare Response | Edit Fields",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Error | Data Table",
             "type": "main",
             "index": 0
           }
@@ -406,7 +636,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "fe0997c9-0991-453c-9034-49d3b06a4af7",
+  "versionId": "c66a22dd-6a84-4af4-9fb8-e894c7a88c34",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "74ee99bc740c6dac711ced63f616b978808d56ad1bdf9d964ab20472df081c38"
